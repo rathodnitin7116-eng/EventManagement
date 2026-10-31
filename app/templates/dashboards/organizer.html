@@ -1,2 +1,100 @@
-{% extends "base.html" %}{% block title %}Organizer Dashboard{% endblock %}
-{% block content %}<h1>Organizer dashboard</h1><p>Welcome, {{ current_user.full_name }}. Your organizer profile requires admin approval before publishing events.</p>{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Organizer Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <h2>Organizer Dashboard</h2>
+
+    <p>Welcome, {{ current_user.full_name }}!</p>
+
+    {% if profile %}
+
+    <div class="alert alert-info">
+        Organization: {{ profile.organization_name }} |
+        Approval Status: <strong>{{ profile.approval_status }}</strong>
+    </div>
+
+    {% endif %}
+
+    <div class="row g-3 mt-3">
+
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm">
+                <h6>Total Events</h6>
+                <h2>{{ stats.total_events or 0 }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm">
+                <h6>Published Events</h6>
+                <h2>{{ stats.published_events or 0 }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm">
+                <h6>Pending Approval</h6>
+                <h2>{{ stats.pending_events or 0 }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm">
+                <h6>Confirmed Bookings</h6>
+                <h2>{{ total_bookings }}</h2>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card mt-4 p-3 shadow-sm">
+
+        <h5>Recent Events</h5>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover">
+
+                <thead>
+                    <tr>
+                        <th>Event Name</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for event in recent_events %}
+
+                    <tr>
+                        <td>{{ event.event_name }}</td>
+                        <td>{{ event.start_at }}</td>
+                        <td>{{ event.event_status }}</td>
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="3" class="text-center">
+                            No events created yet.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
