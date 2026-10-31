@@ -1,0 +1,9 @@
+{% extends "admin/base_admin.html" %}{% block title %}Event review{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3"><h1 class="fw-bold">Event management</h1><a class="btn btn-outline-dark" href="{{ url_for('admin.dashboard') }}">Back to dashboard</a></div>
+<div class="card border-0 shadow-sm"><div class="card-body table-responsive"><table class="table align-middle">
+<thead><tr><th>Event</th><th>Organizer</th><th>Category</th><th>Venue</th><th>Date</th><th>Status / action</th></tr></thead><tbody>
+{% for e in events %}<tr><td>{{ e.event_name }}</td><td>{{ e.organizer_name }}</td><td>{{ e.category_name }}</td><td>{{ e.venue_name or 'Not allocated' }}</td><td>{{ e.start_at }}</td><td><span class="badge text-bg-secondary">{{ e.event_status }}</span>
+{% if e.event_status == 'PENDING_APPROVAL' %}<form method="post" action="{{ url_for('admin.review_event', event_id=e.event_id) }}" class="d-flex flex-wrap gap-1 mt-2"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-success btn-sm" name="decision" value="PUBLISHED">Publish</button><button class="btn btn-outline-danger btn-sm" name="decision" value="REJECTED">Reject</button></form>{% endif %}
+</td></tr>{% else %}<tr><td colspan="6">No events found.</td></tr>{% endfor %}
+</tbody></table></div></div>{% endblock %}

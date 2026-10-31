@@ -1,0 +1,31 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Admin Dashboard | EventSphere{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+  <div><p class="text-uppercase text-secondary small mb-1">Platform control centre</p><h1 class="fw-bold mb-0">Admin dashboard</h1></div>
+  <span class="badge text-bg-dark p-2">Administrator</span>
+</div>
+<div class="row g-3 mb-4">
+  {% for label, value in [('Users', total_users), ('Events', total_events), ('Confirmed bookings', total_bookings), ('Revenue', '₹' ~ ('%.2f'|format(revenue)))] %}
+  <div class="col-6 col-xl-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-secondary small">{{ label }}</div><div class="fs-3 fw-bold">{{ value }}</div></div></div></div>
+  {% endfor %}
+</div>
+<h5 class="fw-bold mb-3">Needs your attention</h5>
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><a class="card card-body text-decoration-none text-dark border-0 shadow-sm" href="{{ url_for('admin.organizers') }}"><span class="text-secondary">Pending organizers</span><strong class="fs-2">{{ pending_organizers }}</strong><span>Review applications →</span></a></div>
+  <div class="col-md-4"><a class="card card-body text-decoration-none text-dark border-0 shadow-sm" href="{{ url_for('admin.events') }}"><span class="text-secondary">Events awaiting approval</span><strong class="fs-2">{{ pending_events }}</strong><span>Review events →</span></a></div>
+  <div class="col-md-4"><a class="card card-body text-decoration-none text-dark border-0 shadow-sm" href="{{ url_for('admin.venue_requests') }}"><span class="text-secondary">Venue requests</span><strong class="fs-2">{{ pending_venue_requests }}</strong><span>Review requests →</span></a></div>
+</div>
+<div class="d-flex flex-wrap gap-2 mb-4">
+  <a class="btn btn-dark" href="{{ url_for('admin.venues') }}">Manage venues</a>
+  <a class="btn btn-outline-dark" href="{{ url_for('admin.organizers') }}">Organizers</a>
+  <a class="btn btn-outline-dark" href="{{ url_for('admin.events') }}">Events</a>
+  <a class="btn btn-outline-dark" href="{{ url_for('admin.venue_requests') }}">Venue requests</a>
+</div>
+<div class="card border-0 shadow-sm"><div class="card-body">
+<h5 class="fw-bold">Recent events</h5>
+<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Event</th><th>Organizer</th><th>Category</th><th>Date</th><th>Status</th></tr></thead><tbody>
+{% for e in recent_events %}<tr><td>{{ e.event_name }}</td><td>{{ e.organizer_name }}</td><td>{{ e.category_name }}</td><td>{{ e.start_at }}</td><td><span class="badge text-bg-secondary">{{ e.event_status }}</span></td></tr>
+{% else %}<tr><td colspan="5" class="text-secondary">No events have been created yet.</td></tr>{% endfor %}
+</tbody></table></div></div></div>
+{% endblock %}

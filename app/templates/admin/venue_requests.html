@@ -1,0 +1,9 @@
+{% extends "admin/base_admin.html" %}{% block title %}Venue requests{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3"><h1 class="fw-bold">Venue allocation requests</h1><a class="btn btn-outline-dark" href="{{ url_for('admin.dashboard') }}">Back to dashboard</a></div>
+<div class="card border-0 shadow-sm"><div class="card-body table-responsive"><table class="table align-middle">
+<thead><tr><th>Event</th><th>Organizer</th><th>Venue</th><th>Schedule</th><th>Status / action</th></tr></thead><tbody>
+{% for r in requests %}<tr><td>{{ r.event_name }}<div class="small text-secondary">{{ r.request_note or '' }}</div></td><td>{{ r.organizer_name }}</td><td>{{ r.venue_name }}<div class="small text-secondary">Capacity {{ r.capacity }}</div></td><td>{{ r.start_at }} – {{ r.end_at }}</td><td><span class="badge text-bg-secondary">{{ r.request_status }}</span>
+{% if r.request_status == 'PENDING' %}<form method="post" action="{{ url_for('admin.review_venue_request', request_id=r.venue_request_id) }}" class="d-flex gap-1 mt-2"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-success btn-sm" name="decision" value="APPROVED">Approve</button><button class="btn btn-outline-danger btn-sm" name="decision" value="REJECTED">Reject</button></form>{% endif %}
+</td></tr>{% else %}<tr><td colspan="5">No venue requests found.</td></tr>{% endfor %}
+</tbody></table></div></div>{% endblock %}

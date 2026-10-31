@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}EventSphere | Event Management{% endblock %}
+{% block content %}
+<section class="hero p-5 rounded-4">
+  <p class="text-uppercase fw-semibold mb-2">Discover · Organize · Experience</p>
+  <h1 class="display-4 fw-bold">Every event, one platform.</h1>
+  <p class="lead col-lg-8">Discover events, book tickets and manage event operations in one place.</p>
+  <a class="btn btn-dark btn-lg mt-2" href="{{ url_for('auth.register') }}">Get started</a>
+  <a class="btn btn-outline-dark btn-lg mt-2" href="{{ url_for('auth.login') }}">Sign in</a>
+</section>
+{% endblock %}

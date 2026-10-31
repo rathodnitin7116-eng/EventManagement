@@ -1,0 +1,10 @@
+{% extends "admin/base_admin.html" %}{% block title %}Organizer approvals{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3"><h1 class="fw-bold">Organizer applications</h1><a class="btn btn-outline-dark" href="{{ url_for('admin.dashboard') }}">Back to dashboard</a></div>
+<div class="card border-0 shadow-sm"><div class="card-body table-responsive"><table class="table align-middle">
+<thead><tr><th>Organization</th><th>Contact</th><th>Email</th><th>Status</th><th>Action</th></tr></thead><tbody>
+{% for o in organizers %}<tr><td>{{ o.organization_name }}</td><td>{{ o.full_name }}</td><td>{{ o.email }}</td><td><span class="badge text-bg-secondary">{{ o.approval_status }}</span></td><td>
+{% if o.approval_status == 'PENDING' %}<form method="post" action="{{ url_for('admin.review_organizer', organizer_id=o.user_id) }}" class="d-flex gap-2">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-success btn-sm" name="decision" value="APPROVED">Approve</button><button class="btn btn-outline-danger btn-sm" name="decision" value="REJECTED">Reject</button></form>{% else %}—{% endif %}
+</td></tr>{% else %}<tr><td colspan="5">No organizer applications.</td></tr>{% endfor %}
+</tbody></table></div></div>{% endblock %}

@@ -1,0 +1,3 @@
+body { background: #f5f6fa; color: #202434; }
+.hero { background: linear-gradient(120deg, #e8efff, #fcebdc); min-height: 330px; display:flex; flex-direction:column; justify-content:center; }
+.card { border-radius: 16px; }

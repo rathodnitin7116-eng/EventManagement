@@ -1,0 +1,19 @@
+{% extends "admin/base_admin.html" %}{% block title %}Venue management{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3"><h1 class="fw-bold">Venue management</h1><a class="btn btn-outline-dark" href="{{ url_for('admin.dashboard') }}">Back to dashboard</a></div>
+<div class="card border-0 shadow-sm mb-4"><div class="card-body"><h5 class="fw-bold">Add a venue</h5>
+<form method="post" class="row g-3">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="col-md-6"><label class="form-label">Venue name</label><input class="form-control" name="venue_name" required maxlength="160"></div>
+<div class="col-md-6"><label class="form-label">Address</label><input class="form-control" name="address_line" required maxlength="255"></div>
+<div class="col-md-4"><label class="form-label">City</label><input class="form-control" name="city" required></div>
+<div class="col-md-4"><label class="form-label">State</label><input class="form-control" name="state"></div>
+<div class="col-md-4"><label class="form-label">Postal code</label><input class="form-control" name="postal_code"></div>
+<div class="col-md-4"><label class="form-label">Capacity</label><input class="form-control" type="number" name="capacity" min="1" required></div>
+<div class="col-md-8"><label class="form-label">Facilities</label><input class="form-control" name="facilities" placeholder="Parking, Wi-Fi, accessibility..."></div>
+<div class="col-12"><button class="btn btn-dark">Add venue</button></div>
+</form></div></div>
+<div class="card border-0 shadow-sm"><div class="card-body"><h5 class="fw-bold">Existing venues</h5><div class="table-responsive"><table class="table">
+<thead><tr><th>Name</th><th>Location</th><th>Capacity</th><th>Status</th></tr></thead><tbody>
+{% for v in venues %}<tr><td>{{ v.venue_name }}</td><td>{{ v.city }}{% if v.state %}, {{ v.state }}{% endif %}</td><td>{{ v.capacity }}</td><td>{{ v.venue_status }}</td></tr>{% else %}<tr><td colspan="4">No venues added yet.</td></tr>{% endfor %}
+</tbody></table></div></div></div>{% endblock %}
