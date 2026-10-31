@@ -8,6 +8,21 @@
 
     <h2>Organizer Dashboard</h2>
 
+    <a href="{{ url_for('pages.organizer_events') }}"
+    class="btn btn-dark mb-3">
+        Manage My Events
+    </a>
+
+    <a href="{{ url_for('pages.create_event') }}"
+    class="btn btn-primary mb-3">
+        + Create New Event
+    </a>
+
+    <a href="{{ url_for('pages.organizer_profile') }}"
+    class="btn btn-primary mb-3">
+        Manage Organization Profile
+    </a>
+
     <p>Welcome, {{ current_user.full_name }}!</p>
 
     {% if profile %}

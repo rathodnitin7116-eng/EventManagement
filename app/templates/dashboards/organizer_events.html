@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Events{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Manage Events</h2>
+
+        <a href="{{ url_for('pages.create_event') }}"
+           class="btn btn-primary">
+            + Create Event
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Category</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for event in events %}
+
+                        <tr>
+                            <td>{{ event.event_name }}</td>
+                            <td>{{ event.category_name }}</td>
+                            <td>{{ event.start_at }}</td>
+                            <td>{{ event.end_at }}</td>
+                            <td>
+                                <span class="badge bg-info text-dark">
+                                    {{ event.event_status }}
+                                </span>
+                            </td>
+                        </tr>
+
+                        {% else %}
+
+                        <tr>
+                            <td colspan="5" class="text-center py-4">
+                                You haven't created any events yet.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+
+    <a href="{{ url_for('pages.organizer_dashboard') }}"
+       class="btn btn-outline-secondary mt-3">
+        Back to Dashboard
+    </a>
+
+</div>
+
+{% endblock %}

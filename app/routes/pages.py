@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, redirect, url_for, abort
+from flask import Blueprint, render_template, redirect, url_for, abort,request, flash
+from datetime import datetime
 from flask_login import login_required, current_user
 from ..database import test_connection,get_connection
 
@@ -97,7 +98,200 @@ def organizer_dashboard():
             recent_events=recent_events
         )
 
+
+
     finally:
         connection.close()
 
+@pages_bp.route("/organizer/profile", methods=["GET", "POST"])
+@login_required
+def organizer_profile():
+    if current_user.role != "ORGANIZER":
+        abort(403)
 
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor(dictionary=True)
+
+        if request.method == "POST":
+            organization_name = request.form.get("organization_name", "").strip()
+            phone = request.form.get("phone", "").strip()
+            description = request.form.get("description", "").strip()
+
+            if not organization_name:
+                flash("Organization name is required.", "error")
+            else:
+                cursor.execute("""
+                    UPDATE organizer_profiles
+                    SET organization_name = %s,
+                        phone = %s,
+                        description = %s
+                    WHERE organizer_id = %s
+                """, (
+                    organization_name,
+                    phone or None,
+                    description or None,
+                    int(current_user.id)
+                ))
+
+                connection.commit()
+                flash("Organization profile updated successfully.", "success")
+
+                return redirect(url_for("pages.organizer_profile"))
+
+        cursor.execute("""
+            SELECT organization_name, phone, description, approval_status
+            FROM organizer_profiles
+            WHERE organizer_id = %s
+        """, (int(current_user.id),))
+
+        profile = cursor.fetchone()
+
+        cursor.close()
+
+        if not profile:
+            abort(404)
+
+        return render_template(
+            "dashboards/organizer_profile.html",
+            profile=profile
+        )
+
+    finally:
+        connection.close()
+
+@pages_bp.route("/organizer/events/create", methods=["GET", "POST"])
+@login_required
+def create_event():
+    if current_user.role != "ORGANIZER":
+        abort(403)
+
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor(dictionary=True)
+
+        # Check organizer approval
+        cursor.execute("""
+            SELECT approval_status
+            FROM organizer_profiles
+            WHERE organizer_id = %s
+        """, (int(current_user.id),))
+
+        profile = cursor.fetchone()
+
+        if not profile or profile["approval_status"] != "APPROVED":
+            cursor.close()
+            flash("Your organizer account must be approved before creating events.", "warning")
+            return redirect(url_for("pages.organizer_dashboard"))
+
+        # Fetch event categories
+        cursor.execute("""
+            SELECT category_id, category_name
+            FROM categories
+            ORDER BY category_name
+        """)
+        categories = cursor.fetchall()
+
+        if request.method == "POST":
+            event_name = request.form.get("event_name", "").strip()
+            description = request.form.get("description", "").strip()
+            category_id = request.form.get("category_id", "").strip()
+            start_at = request.form.get("start_at", "").strip()
+            end_at = request.form.get("end_at", "").strip()
+
+            if not all([event_name, category_id, start_at, end_at]):
+                flash("Please fill in all required fields.", "error")
+
+            else:
+                try:
+                    category_id = int(category_id)
+                    start_date = datetime.strptime(start_at, "%Y-%m-%dT%H:%M")
+                    end_date = datetime.strptime(end_at, "%Y-%m-%dT%H:%M")
+
+                    if end_date <= start_date:
+                        raise ValueError("End time must be after start time.")
+
+                    if start_date <= datetime.now():
+                        raise ValueError("Event must be scheduled in the future.")
+
+                    cursor.execute("""
+                        SELECT category_id
+                        FROM categories
+                        WHERE category_id = %s
+                    """, (category_id,))
+
+                    if not cursor.fetchone():
+                        raise ValueError("Please select a valid category.")
+
+                    cursor.execute("""
+                        INSERT INTO events
+                        (organizer_id, category_id, event_name, description,
+                         start_at, end_at, event_status)
+                        VALUES (%s, %s, %s, %s, %s, %s, 'PENDING_APPROVAL')
+                    """, (
+                        int(current_user.id),
+                        category_id,
+                        event_name,
+                        description or None,
+                        start_date,
+                        end_date
+                    ))
+
+                    connection.commit()
+                    flash("Event submitted successfully for admin approval!", "success")
+                    return redirect(url_for("pages.organizer_dashboard"))
+
+                except ValueError as error:
+                    flash(str(error), "error")
+
+        cursor.close()
+
+        return render_template(
+            "dashboards/create_event.html",
+            categories=categories
+        )
+
+    except Exception:
+        connection.rollback()
+        raise
+
+    finally:
+        connection.close()
+@pages_bp.route("/organizer/events")
+@login_required
+def organizer_events():
+    if current_user.role != "ORGANIZER":
+        abort(403)
+
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT
+                e.event_id,
+                e.event_name,
+                c.category_name,
+                e.start_at,
+                e.end_at,
+                e.event_status
+            FROM events e
+            JOIN categories c
+                ON c.category_id = e.category_id
+            WHERE e.organizer_id = %s
+            ORDER BY e.created_at DESC
+        """, (int(current_user.id),))
+
+        events = cursor.fetchall()
+        cursor.close()
+
+        return render_template(
+            "dashboards/organizer_events.html",
+            events=events
+        )
+
+    finally:
+        connection.close()
